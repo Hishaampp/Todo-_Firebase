@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "426093105095",
+    "project_id": "hishaam-todo",
+    "storage_bucket": "hishaam-todo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:426093105095:android:b4d9b20a839371522813e2",
+        "android_client_info": {
+          "package_name": "com.example.hisham_todo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "426093105095-3tmeougkb2e0cv6fse1crg9ukapcq8h9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxj2E6Tj3clgaTgrw1n7cXoiVdQwTCeEo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "426093105095-3tmeougkb2e0cv6fse1crg9ukapcq8h9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
