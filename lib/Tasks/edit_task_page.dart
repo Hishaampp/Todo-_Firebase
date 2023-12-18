@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors_in_immutables, use_key_in_widget_constructors, library_private_types_in_public_api, prefer_const_constructors, use_build_context_synchronously, avoid_print
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,16 +5,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 User? user = FirebaseAuth.instance.currentUser;
 
 class EditTaskPage extends StatefulWidget {
-  final String documentId;
   final String currentTask;
   final String currentSubtask;
 
-
   EditTaskPage({
-    required this.documentId,
     required this.currentTask,
     required this.currentSubtask,
-   
   });
 
   @override
@@ -54,21 +48,114 @@ class _EditTaskPageState extends State<EditTaskPage> {
               decoration: InputDecoration(labelText: 'Add sub task'),
             ),
             SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  CollectionReference collRef =
-                      FirebaseFirestore.instance.collection('users_tasks');
-                  await collRef.doc(widget.documentId).update({
-                    'task': taskNameController.text,
-                    'subtask': subtaskNameController.text,
-                  });
-                  Navigator.pop(context);
-                } catch (e) {
-                  print("Error updating data: $e");
-                }
-              },
-              child: Text('Update Task'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      String uid = user!.uid;
+                      CollectionReference collRef =
+                          FirebaseFirestore.instance.collection('client');
+
+                      // Get the user's document by UID
+                      DocumentSnapshot userDoc =
+                          await collRef.doc(uid).get();
+
+                      // Get the current tasks array
+                      List<dynamic> tasks = userDoc['tasks'];
+
+                      // Print debug messages
+                      print('UID: $uid');
+                      print('Current tasks: $tasks');
+
+                      // Iterate through tasks to find the matching task and update
+                      for (int i = 0; i < tasks.length; i++) {
+                        print('Checking task: ${tasks[i]}');
+                        if (tasks[i]['task'] == widget.currentTask &&
+                            tasks[i]['subTask'] == widget.currentSubtask) {
+                          // Update the matching task
+                          tasks[i]['task'] = taskNameController.text;
+                          tasks[i]['subTask'] = subtaskNameController.text;
+
+                          // Update the entire tasks array in the document
+                          await collRef.doc(uid).update({'tasks': tasks});
+
+                          // Print debug message
+                          print('Updated tasks: $tasks');
+
+                          Navigator.pop(context);
+                          return; // Exit the loop once the task is updated
+                        }
+                      }
+
+                      // If no match found
+                      print('Task not found for update.');
+                    } catch (e) {
+                      print("Error updating data: $e");
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Error updating task: $e"),
+                          duration: Duration(seconds: 3),
+                        ),
+                      );
+                    }
+                  },
+                  child: Text('Update Task'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      String uid = user!.uid;
+                      CollectionReference collRef =
+                          FirebaseFirestore.instance.collection('client');
+
+                      // Get the user's document by UID
+                      DocumentSnapshot userDoc =
+                          await collRef.doc(uid).get();
+
+                      // Get the current tasks array
+                      List<dynamic> tasks = userDoc['tasks'];
+
+                      // Print debug messages
+                      print('UID: $uid');
+                      print('Current tasks: $tasks');
+
+                      // Iterate through tasks to find the matching task and delete
+                      for (int i = 0; i < tasks.length; i++) {
+                        print('Checking task: ${tasks[i]}');
+                        if (tasks[i]['task'] == widget.currentTask &&
+                            tasks[i]['subTask'] == widget.currentSubtask) {
+                          // Remove the matching task
+                          tasks.removeAt(i);
+
+                          // Update the entire tasks array in the document
+                          await collRef.doc(uid).update({'tasks': tasks});
+
+                          // Print debug message
+                          print('Updated tasks: $tasks');
+
+                          Navigator.pop(context);
+                          return; // Exit the loop once the task is deleted
+                        }
+                      }
+
+                      // If no match found
+                      print('Task not found for deletion.');
+                    } catch (e) {
+                      print("Error deleting data: $e");
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Error deleting task: $e"),
+                          duration: Duration(seconds: 3),
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(primary: Colors.red),
+                  child: Text('Delete Task'),
+                ),
+              ],
             ),
           ],
         ),

@@ -29,7 +29,7 @@ class TaskList extends StatelessWidget {
         ],
       ),
       body: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('users_tasks').snapshots(),
+        stream: FirebaseFirestore.instance.collection('client').snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CircularProgressIndicator();
@@ -73,7 +73,7 @@ class TaskList extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => EditTaskPage(
-                                documentId: reversedDocs[index].id,
+                                // documentId: reversedDocs[index].id,
                                 currentTask: taskData['task'],
                                 currentSubtask: taskData['subTask'],
                               ),

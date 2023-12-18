@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hisham_todo/main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hisham_todo/Tasks/edit_task_page.dart';
+
+User? user = FirebaseAuth.instance.currentUser;
 
 class TaskCard extends StatelessWidget {
   final String uid;
@@ -9,9 +12,6 @@ class TaskCard extends StatelessWidget {
   final String cardTitle;
   final int tasksRemaining;
   final double taskCompletion;
-  final String task;
-  final String subtask;
-
   final VoidCallback onEditPressed;
 
   TaskCard({
@@ -21,11 +21,7 @@ class TaskCard extends StatelessWidget {
     required this.cardTitle,
     required this.tasksRemaining,
     required this.taskCompletion,
-    required this.onEditPressed,
-    required this.task
-    required this.subtask
-
-    // required Null Function() onDeletePressed,
+    required this.onEditPressed, 
   });
 
   @override
@@ -49,15 +45,33 @@ class TaskCard extends StatelessWidget {
                       color: color,
                     ),
                     PopupMenuButton<String>(
-                      onSelected: (value) {
+                      onSelected: (value) async {
                         if (value == 'edit') {
                           onEditPressed();
                         } else if (value == 'delete') {
-                          _deleteTask(uid, task);
-                          // FirebaseFirestore.instance
-                          //     .collection('users_tasks')
-                          //     .doc(currentuser!.uid)
-                          //     .delete();
+                          try {
+                            // Fetch the current document
+                            final taskListSnapshot = await FirebaseFirestore.instance
+                                .collection('client')
+                                .doc(user!.uid)
+                                .get();
+
+                            // Extract the taskList array from the document
+                            List<dynamic> taskList = taskListSnapshot['tasks'];
+
+                            // Delete the first task from the array (you can adjust the index as needed)
+                            if (taskList.isNotEmpty) {
+                              taskList.removeAt(0); // Change this index as needed
+                            }
+
+                            // Update the document with the modified taskList
+                            await FirebaseFirestore.instance
+                                .collection('client')
+                                .doc(user!.uid)
+                                .update({'tasks': taskList});
+                          } catch (e) {
+                            print("Error deleting task: $e");
+                          }
                         }
                       },
                       itemBuilder: (BuildContext context) {
@@ -106,8 +120,7 @@ class TaskCard extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   "Date and Time: ${DateTime.now().toString()}",
-                  style:
-                      TextStyle(color: const Color.fromARGB(255, 17, 16, 16)),
+                  style: TextStyle(color: const Color.fromARGB(255, 17, 16, 16)),
                 ),
               ),
             ],
@@ -115,22 +128,5 @@ class TaskCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _deleteTask(String documentId, TaskCard task) async {
-    try {
-      await FirebaseFirestore.instance.collection("client").doc(uid).update({
-        'tasks': FieldValue.arrayRemove([
-          {
-            'task': task.taskCompletion,
-            // 'subTask': task.,
-          }
-        ])
-      });
-      //  setState(() {});
-    } catch (e) {
-      // Handle errors if any
-      print("Error deleting task: $e");
-    }
   }
 }

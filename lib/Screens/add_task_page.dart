@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AddTaskController {
   Future<void> addTask(
-      String taskName, String subTaskName,) async {
+      String taskName, String subTaskName, String format,) async {
     try {
       if (taskName.isEmpty ||
           subTaskName.isEmpty 
@@ -26,7 +26,7 @@ class AddTaskController {
       print(uid);
       if (uid != null) {
         var collRef =
-            FirebaseFirestore.instance.collection('users_tasks').doc(uid);
+            FirebaseFirestore.instance.collection('client').doc(uid);
 
         // Check if the document for the user exists
         var userDoc = await collRef.get();

@@ -1,16 +1,7 @@
-// ignore_for_file: unused_local_variable
-
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import 'package:hisham_todo/Screens/add_task_page.dart';
-
-import '../Screens/task_list.dart';
-
-void main() {
-  runApp(MaterialApp(
-    home: AddTaskPage(),
-  ));
-}
 
 class AddTaskPage extends StatefulWidget {
   @override
@@ -20,9 +11,10 @@ class AddTaskPage extends StatefulWidget {
 class _AddTaskPageState extends State<AddTaskPage> {
   final taskname = TextEditingController();
   final subtaskname = TextEditingController();
+  DateTime selectedDate = DateTime.now();
+  TimeOfDay selectedTime = TimeOfDay.now();
 
   AddTaskController task = AddTaskController();
-  // Get the current user
   User? user = FirebaseAuth.instance.currentUser;
 
   @override
@@ -45,26 +37,76 @@ class _AddTaskPageState extends State<AddTaskPage> {
               decoration: InputDecoration(labelText: 'Add sub task'),
             ),
             SizedBox(height: 16.0),
+            Row(
+              children: [
+                Text(
+                  'Select Date: ${DateFormat('yyyy-MM-dd').format(selectedDate)}',
+                  style: TextStyle(fontSize: 16.0),
+                ),
+                SizedBox(width: 8.0),
+                ElevatedButton(
+                  onPressed: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: selectedDate,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(2101),
+                    );
+
+                    if (pickedDate != null && pickedDate != selectedDate) {
+                      setState(() {
+                        selectedDate = pickedDate;
+                      });
+                    }
+                  },
+                  child: Text('Pick Date'),
+                ),
+              ],
+            ),
+            SizedBox(height: 16.0),
+            Row(
+              children: [
+                Text(
+                  'Select Time: ${selectedTime.format(context)}',
+                  style: TextStyle(fontSize: 16.0),
+                ),
+                SizedBox(width: 8.0),
+                ElevatedButton(
+                  onPressed: () async {
+                    TimeOfDay? pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: selectedTime,
+                    );
+
+                    if (pickedTime != null && pickedTime != selectedTime) {
+                      setState(() {
+                        selectedTime = pickedTime;
+                      });
+                    }
+                  },
+                  child: Text('Pick Time'),
+                ),
+              ],
+            ),
+            SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () async {
                 try {
-                  // Check if the user is logged in
                   if (user != null) {
                     String uid = user!.uid;
-                     task.addTask(taskname.text, subtaskname.text);
-                    // Reference to the user's tasks collection
-                    // CollectionReference userTasksRef = FirebaseFirestore
-                    //     .instance
-                    //     .collection('users_tasks'),
-                    //     .;doc(user!.uid);
+                    DateTime combinedDateTime = DateTime(
+                      selectedDate.year,
+                      selectedDate.month,
+                      selectedDate.day,
+                      selectedTime.hour,
+                      selectedTime.minute,
+                    );
 
-                    // // Add task to the user's tasks collection
-                    // await userTasksRef.add({
-                    //   'task': taskname.text,
-                    //   'subtask': subtaskname.text,
-
-                    // });
-
+                    task.addTask(
+                      taskname.text,
+                      subtaskname.text,
+                      combinedDateTime.toString(),
+                    );
                     print("Data added successfully");
                   } else {
                     print("User not logged in");
@@ -75,10 +117,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
               },
               child: Text('Add Task'),
             ),
-            // SizedBox(height: 16.0),
-            // Expanded(
-            //   child: TaskList(),
-            // ),
           ],
         ),
       ),

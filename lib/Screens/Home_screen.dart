@@ -16,17 +16,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late List<DocumentSnapshot> tasks;
+  late List<DocumentSnapshot> tasks = []; // Initialize tasks as an empty list
   TextEditingController searchController = TextEditingController();
   final taskNameController = TextEditingController();
   var uid;
 
+  @override
   void initState() {
     super.initState();
     uid = FirebaseAuth.instance.currentUser?.uid;
+    // Load or populate tasks as needed
   }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(),
@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
               future: FirebaseFirestore.instance
-                  .collection("users_tasks")
+                  .collection("client")
                   .doc(uid)
                   .get(),
               builder: (context, snapshot) {
@@ -93,14 +93,16 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       actions: [
         IconButton(
-          onPressed: () {
-            showSearch(
-              context: context,
-              delegate: TaskSearchDelegate(tasks: tasks),
-            );
-          },
-          icon: Icon(Icons.search),
-        ),
+  onPressed: () {
+   showSearch( 
+  context: context,
+  delegate: TaskSearchDelegate(uid: FirebaseAuth.instance.currentUser!.uid),
+);
+  },
+  icon: Icon(Icons.search),
+),
+
+
       ],
     );
   }
